@@ -5,7 +5,8 @@ import {
   MoreVertical,
   Check,
   Edit2,
-  Trash2
+  Trash2,
+  PenLine
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -27,6 +28,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface TaskCardProps {
   task: Task;
@@ -46,6 +64,13 @@ export function TaskCard({
   onDelete 
 }: TaskCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editedTask, setEditedTask] = useState({
+    title: task.title,
+    description: task.description || '',
+    priority: task.priority,
+    dueTime: task.dueTime || ''
+  });
   
   const getPriorityBadgeStyles = (priority: Priority) => {
     switch (priority) {
@@ -66,11 +91,21 @@ export function TaskCard({
     return priority.charAt(0).toUpperCase() + priority.slice(1);
   };
 
+  const handleTaskEdit = () => {
+    onEdit(editedTask);
+    setIsEditDialogOpen(false);
+  };
+
+  const handleTaskClick = () => {
+    onToggleExpand();
+  };
+
   return (
     <>
       <div className={cn(
         "task-card bg-white rounded-lg shadow hover:shadow-md transition-all p-4",
-        "hover:translate-y-[-2px] duration-200"
+        "hover:translate-y-[-2px] duration-200",
+        task.completed && "bg-gray-50"
       )}>
         <div className="flex items-start">
           <div className="flex-shrink-0 pt-1">
@@ -95,10 +130,10 @@ export function TaskCard({
             <div className="flex items-center justify-between">
               <h3 
                 className={cn(
-                  "text-lg font-medium", 
+                  "text-lg font-medium cursor-pointer", 
                   task.completed && "line-through text-gray-500"
                 )}
-                onClick={onToggleExpand}
+                onClick={handleTaskClick}
               >
                 {task.title}
               </h3>
@@ -124,15 +159,18 @@ export function TaskCard({
                     <DropdownMenuItem onClick={onToggleExpand}>
                       {isExpanded ? 'Show less' : 'Show more'}
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                      <PenLine className="h-4 w-4 mr-2" /> Edit task
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-red-600">
-                      Delete
+                      <Trash2 className="h-4 w-4 mr-2" /> Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
-            {(isExpanded || task.description?.length && task.description.length < 60) && (
+            {(isExpanded || (task.description?.length && task.description.length < 60)) && (
               <p 
                 className={cn(
                   "mt-1",
@@ -155,6 +193,65 @@ export function TaskCard({
         </div>
       </div>
       
+      {/* Edit Task Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input 
+                id="title" 
+                value={editedTask.title} 
+                onChange={(e) => setEditedTask({...editedTask, title: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea 
+                id="description" 
+                value={editedTask.description} 
+                onChange={(e) => setEditedTask({...editedTask, description: e.target.value})}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <Select 
+                value={editedTask.priority}
+                onValueChange={(value) => setEditedTask({...editedTask, priority: value as Priority})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dueTime">Due Time</Label>
+              <Input 
+                id="dueTime" 
+                type="time"
+                value={editedTask.dueTime} 
+                onChange={(e) => setEditedTask({...editedTask, dueTime: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleTaskEdit}>Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Task Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

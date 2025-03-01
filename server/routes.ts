@@ -92,13 +92,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/tasks', async (req, res) => {
     try {
-      const taskData = insertTaskSchema.parse(req.body);
+      // Parse the body first to get a clean object
+      const rawData = req.body;
+      
+      // Convert the string date to a Date object if it's a string
+      if (rawData.dueDate && typeof rawData.dueDate === 'string') {
+        rawData.dueDate = new Date(rawData.dueDate);
+      }
+      
+      const taskData = insertTaskSchema.parse(rawData);
       const task = await storage.createTask(taskData);
       return res.status(201).json(task);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid task data', errors: error.errors });
       }
+      console.error('Error creating task:', error);
       return res.status(500).json({ message: 'Error creating task' });
     }
   });
@@ -108,6 +117,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const taskId = parseInt(req.params.id);
       const taskUpdate = req.body;
       
+      // Convert the string date to a Date object if it's a string
+      if (taskUpdate.dueDate && typeof taskUpdate.dueDate === 'string') {
+        taskUpdate.dueDate = new Date(taskUpdate.dueDate);
+      }
+      
       const updatedTask = await storage.updateTask(taskId, taskUpdate);
       
       if (!updatedTask) {
@@ -116,6 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       return res.json(updatedTask);
     } catch (error) {
+      console.error('Error updating task:', error);
       return res.status(500).json({ message: 'Error updating task' });
     }
   });
