@@ -126,10 +126,28 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   };
   
   const toggleTaskCompletion = async (task: Task) => {
-    return updateTaskMutation.mutateAsync({ 
-      id: task.id, 
-      completed: !task.completed 
-    });
+    try {
+      // Create a new task object with the toggled completed state
+      const updatedTask = await updateTaskMutation.mutateAsync({ 
+        id: task.id, 
+        completed: !task.completed 
+      });
+      
+      // Force a refresh of the task lists after completion toggle
+      queryClient.invalidateQueries({ queryKey: [`/api/tasks?userId=${userId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/tasks/today?userId=${userId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/stats/today?userId=${userId}`] });
+      
+      return updatedTask;
+    } catch (error) {
+      console.error("Error toggling task completion:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update task completion status",
+        variant: "destructive",
+      });
+      return task; // Return original task on error
+    }
   };
 
   return (
