@@ -127,13 +127,14 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   
   const toggleTaskCompletion = async (task: Task) => {
     try {
-      // Create a new task object with the toggled completed state
-      const updatedTask = await updateTaskMutation.mutateAsync({ 
-        id: task.id, 
+      // Make a direct API call to update task completion status
+      const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         completed: !task.completed 
       });
       
-      // Force a refresh of the task lists after completion toggle
+      const updatedTask = await response.json();
+      
+      // Force a refresh of all related queries to ensure UI consistency
       queryClient.invalidateQueries({ queryKey: [`/api/tasks?userId=${userId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/tasks/today?userId=${userId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/stats/today?userId=${userId}`] });
