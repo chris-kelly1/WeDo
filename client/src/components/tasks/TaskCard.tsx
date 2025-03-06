@@ -155,9 +155,6 @@ export function TaskCard({
                     <DropdownMenuItem onClick={onComplete}>
                       {task.completed ? 'Mark as incomplete' : 'Mark as complete'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onToggleExpand}>
-                      {isExpanded ? 'Show less' : 'Show more'}
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
                       <PenLine className="h-4 w-4 mr-2" /> Edit task
                     </DropdownMenuItem>
@@ -169,7 +166,7 @@ export function TaskCard({
                 </DropdownMenu>
               </div>
             </div>
-            {(isExpanded || (task.description?.length && task.description.length < 60)) && (
+            {task.description && (
               <p 
                 className={cn(
                   "mt-1",
