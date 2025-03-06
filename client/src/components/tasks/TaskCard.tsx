@@ -104,8 +104,7 @@ export function TaskCard({
     <>
       <div className={cn(
         "task-card bg-white rounded-lg shadow hover:shadow-md transition-all p-4",
-        "hover:translate-y-[-2px] duration-200",
-        task.completed && "bg-gray-50"
+        "hover:translate-y-[-2px] duration-200"
       )}>
         <div className="flex items-start">
           <div className="flex-shrink-0 pt-1">
