@@ -63,27 +63,27 @@ export function FriendActivity() {
   }
 
   return (
-    <div>
+    <div className="mb-10">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Friend Activity</h2>
+        <h2 className="text-2xl font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Friend Activity</h2>
         <Link href="/friends">
-          <Button variant="link" className="text-primary font-medium hover:text-indigo-700">
+          <Button variant="outline" className="font-medium border-primary hover:bg-primary/10">
             View all <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </Link>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayFriends.map((friend) => (
           <FriendCard key={friend.id} friend={friend} />
         ))}
       </div>
       
       {friends.length > 3 && !showAllFriends && (
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <Button 
-            variant="link" 
-            className="text-primary font-medium hover:text-indigo-700"
+            variant="outline"
+            className="font-medium border-primary hover:bg-primary/10"
             onClick={() => setShowAllFriends(true)}
           >
             Show more friends

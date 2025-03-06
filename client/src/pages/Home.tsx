@@ -40,8 +40,8 @@ export default function Home() {
         
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
           <DailyOverview />
-          <TodayTasks />
           <FriendActivity />
+          <TodayTasks />
         </main>
         
         <MobileNavigation />
