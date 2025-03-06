@@ -21,7 +21,6 @@ export function TodayTasks() {
   } = useTasks();
   
   const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
-  const [showAllTasks, setShowAllTasks] = useState(false);
   
   const toggleTaskExpanded = (taskId: number) => {
     setExpandedTasks(prev => 
@@ -31,7 +30,8 @@ export function TodayTasks() {
     );
   };
   
-  const displayTasks = showAllTasks ? todayTasks : todayTasks.slice(0, 5);
+  // Show all tasks always
+  const displayTasks = todayTasks;
   
   if (isLoading) {
     return (
@@ -97,18 +97,6 @@ export function TodayTasks() {
               />
             ))}
           </div>
-          
-          {todayTasks.length > 5 && (
-            <div className="mt-4 text-center">
-              <Button 
-                variant="link" 
-                className="text-primary font-medium hover:text-indigo-700"
-                onClick={() => setShowAllTasks(!showAllTasks)}
-              >
-                {showAllTasks ? 'Show less' : `View all tasks (${todayTasks.length})`}
-              </Button>
-            </div>
-          )}
         </>
       )}
       
