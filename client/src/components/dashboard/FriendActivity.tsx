@@ -63,9 +63,9 @@ export function FriendActivity() {
   }
 
   return (
-    <div className="mb-10">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">Friend Activity</h2>
+    <div className="mb-12">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">Friend Activity</h2>
         <Link href="/friends">
           <Button variant="outline" className="font-medium border-primary hover:bg-primary/10">
             View all <ChevronRight className="ml-1 h-4 w-4" />

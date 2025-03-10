@@ -43,7 +43,7 @@ export function TodayTasks() {
     return (
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold">Today's Tasks</h2>
+          <h2 className="text-2xl font-semibold text-gray-700">Today's Tasks</h2>
           <Button>
             <Plus className="mr-1 h-4 w-4" /> Add Task
           </Button>
@@ -78,7 +78,7 @@ export function TodayTasks() {
         <CardContent className="p-0">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
-              <h2 className="text-2xl font-semibold">Today's Tasks</h2>
+              <h2 className="text-2xl font-semibold text-gray-700">Today's Tasks</h2>
               <span className="ml-2 text-sm text-gray-500 bg-gray-100 rounded-full px-2">
                 {todayTasks.length}
               </span>
