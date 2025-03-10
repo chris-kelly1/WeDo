@@ -17,7 +17,7 @@ export function FriendCard({ friend }: FriendCardProps) {
         <div className="ml-4 flex-1">
           <h3 className="font-semibold text-gray-800">{friend.name}</h3>
           <p className="text-sm text-gray-500">
-            {Math.floor(friend.progress / 10)} of {Math.ceil(friend.progress / 10) * 10} tasks
+            {Math.floor(friend.progress * 0.1)} of 10 tasks
           </p>
         </div>
         <div className="ml-auto text-xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">

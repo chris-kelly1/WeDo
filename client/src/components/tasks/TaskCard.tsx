@@ -117,7 +117,10 @@ export function TaskCard({
                   ? "border-success bg-success" 
                   : "border-success bg-white"
               )}
-              onClick={onComplete}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent row expansion on click
+                onComplete();
+              }}
             >
               <Check className={cn(
                 "h-3 w-3", 
@@ -152,7 +155,12 @@ export function TaskCard({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={onComplete}>
+                    <DropdownMenuItem 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onComplete();
+                      }}
+                    >
                       {task.completed ? 'Mark as incomplete' : 'Mark as complete'}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
