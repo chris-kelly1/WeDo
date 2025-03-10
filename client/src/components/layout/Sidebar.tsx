@@ -23,7 +23,7 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div className={cn("hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200 py-4 px-3", className)}>
       <div className="flex items-center justify-center h-14 mb-8">
-        <h1 className="text-2xl font-bold text-primary">TaskStep</h1>
+        <h1 className="text-2xl font-bold text-primary">WeDo</h1>
       </div>
       
       <nav className="flex-1 space-y-1">
@@ -38,8 +38,8 @@ export function Sidebar({ className }: SidebarProps) {
               className={cn(
                 "flex items-center px-4 py-3 rounded-md group",
                 isActive 
-                  ? "text-gray-900 bg-gray-100" 
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "text-blue-700 bg-blue-50" 
+                  : "text-gray-600 hover:bg-gray-50"
               )}
             >
               <Icon className={cn("mr-3 h-5 w-5", isActive ? "text-primary" : "text-gray-500")} />

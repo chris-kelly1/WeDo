@@ -31,7 +31,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
           <Menu className="h-5 w-5 text-gray-600" />
         </Button>
         <Link href="/">
-          <h1 className="text-xl font-bold text-primary ml-3">TaskStep</h1>
+          <h1 className="text-xl font-bold text-primary ml-3">WeDo</h1>
         </Link>
       </div>
       

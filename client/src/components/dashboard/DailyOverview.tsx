@@ -93,7 +93,7 @@ export function DailyOverview() {
               </p>
             </div>
             <div className="mt-3 sm:mt-0">
-              <span className="text-4xl font-bold text-primary bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">{progress}%</span>
+              <span className="text-4xl font-bold text-primary bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">{progress}%</span>
             </div>
           </div>
           
