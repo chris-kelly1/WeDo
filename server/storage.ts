@@ -137,10 +137,12 @@ export class MemStorage implements IStorage {
         if (!friend) throw new Error("Friend not found");
         
         const friendTasks = await this.getTasks(relation.friendId);
-        const totalTasks = friendTasks.length;
+        // For demo purposes, we'll fix this to show 10 tasks total (as requested by user)
+        // This keeps the progress calculation real but with a fixed denominator
         const completedTasks = friendTasks.filter((task) => task.completed).length;
         
-        const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        // Calculate progress as completed tasks out of 10 (fixed denominator), capped at 100%
+        const progress = Math.min(Math.round((completedTasks / 10) * 100), 100);
         
         return {
           ...friend,

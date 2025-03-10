@@ -22,7 +22,7 @@ export function TodayTasks() {
   } = useTasks();
   
   const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
-  const [isSectionExpanded, setIsSectionExpanded] = useState(false);
+  const [isSectionExpanded, setIsSectionExpanded] = useState(true);
   
   const toggleTaskExpanded = (taskId: number) => {
     setExpandedTasks(prev => 

@@ -127,20 +127,36 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   
   const toggleTaskCompletion = async (task: Task) => {
     try {
-      // Make a direct API call to update task completion status
+      // Optimistically update the task in the cache to prevent UI flickering
+      const optimisticTask = { ...task, completed: !task.completed };
+      
+      // Update tasks in the cache
+      queryClient.setQueryData([`/api/tasks?userId=${userId}`], (oldData: Task[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.map(t => t.id === task.id ? optimisticTask : t);
+      });
+      
+      queryClient.setQueryData([`/api/tasks/today?userId=${userId}`], (oldData: Task[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.map(t => t.id === task.id ? optimisticTask : t);
+      });
+      
+      // Make API call to update the server
       const response = await apiRequest('PATCH', `/api/tasks/${task.id}`, { 
         completed: !task.completed 
       });
       
       const updatedTask = await response.json();
       
-      // Force a refresh of all related queries to ensure UI consistency
-      queryClient.invalidateQueries({ queryKey: [`/api/tasks?userId=${userId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/tasks/today?userId=${userId}`] });
+      // Only invalidate stats query since we've already updated the tasks optimistically
       queryClient.invalidateQueries({ queryKey: [`/api/stats/today?userId=${userId}`] });
       
       return updatedTask;
     } catch (error) {
+      // Revert optimistic update on error
+      queryClient.invalidateQueries({ queryKey: [`/api/tasks?userId=${userId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/tasks/today?userId=${userId}`] });
+      
       console.error("Error toggling task completion:", error);
       toast({
         title: "Error",
