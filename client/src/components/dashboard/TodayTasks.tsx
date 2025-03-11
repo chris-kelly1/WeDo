@@ -74,9 +74,9 @@ export function TodayTasks() {
 
   return (
     <div className="mb-10">
-      <Card className="cursor-pointer" onClick={toggleSectionExpanded}>
+      <Card>
         <CardContent className="p-0">
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50" onClick={toggleSectionExpanded}>
             <div className="flex items-center">
               <h2 className="text-2xl font-semibold text-gray-700">Today's Tasks</h2>
               <span className="ml-2 text-sm text-gray-500 bg-gray-100 rounded-full px-2">
