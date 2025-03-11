@@ -1,196 +1,153 @@
-import { useState } from "react";
-import { useParams, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { GroupDetails } from "@/components/groups/GroupDetails";
-import { GroupTaskList } from "@/components/groups/GroupTaskList";
-import { ArrowLeft } from "lucide-react";
-import { Priority } from "@/lib/types";
+import { useState } from 'react';
+import { useRoute } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { GroupDetails } from '@/components/groups/GroupDetails';
+import { Priority } from '@/lib/types';
 
-// Mock data for a detailed group view
-const getGroupData = (groupId: string) => {
-  // This would normally be a fetch call to your API
-  const id = parseInt(groupId);
-  
-  return {
-    group: {
-      id,
-      name: id === 1 ? "Website Redesign" : "Coding Study Group",
-      description: id === 1 
-        ? "Collaborative project to redesign company website" 
-        : "Group for learning and practicing coding together",
-      goalDate: new Date(new Date().getTime() + (id === 1 ? 14 : 30) * 24 * 60 * 60 * 1000),
-      totalTasks: id === 1 ? 8 : 6, 
-      completedTasks: id === 1 ? 3 : 1,
-      progress: id === 1 ? 37 : 16
-    },
-    members: [
-      { 
-        id: 1, 
-        name: "Sophia Chen", 
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", 
-        role: id === 1 ? "admin" : "member",
-        completed: id === 1 ? 2 : 0,
-        total: id === 1 ? 4 : 2
-      },
-      { 
-        id: 2, 
-        name: "Alex Johnson", 
-        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", 
-        role: id === 1 ? "member" : "admin",
-        completed: id === 1 ? 1 : 1,
-        total: id === 1 ? 2 : 3
-      },
-      { 
-        id: 3, 
-        name: "Maria Garcia", 
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80", 
-        role: "member",
-        completed: 0,
-        total: id === 1 ? 2 : 0
-      }
-    ].filter(m => id === 1 || m.id !== 3), // Only include Maria in group 1
-    tasks: [
-      {
-        id: 1,
-        title: "Set up project structure",
-        description: "Create initial file structure and basic configurations",
-        dueDate: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        priority: "high" as Priority,
-        completed: true,
-        assignedTo: 2,
-        createdBy: id === 1 ? 1 : 2
-      },
-      {
-        id: 2,
-        title: "Create wireframes",
-        description: "Design initial wireframes for main pages",
-        dueDate: new Date(new Date().getTime() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-        priority: "urgent" as Priority,
-        completed: false,
-        assignedTo: 1,
-        createdBy: id === 1 ? 1 : 2
-      },
-      {
-        id: 3,
-        title: id === 1 ? "Implement homepage design" : "Complete Chapter 3 exercises",
-        description: id === 1 
-          ? "Develop the layout and components for the homepage" 
-          : "Finish practice problems from Chapter 3",
-        dueDate: new Date(), // Today
-        priority: "medium" as Priority,
-        completed: false,
-        assignedTo: id === 1 ? 3 : 1,
-        createdBy: id === 1 ? 1 : 2
-      },
-      {
-        id: 4,
-        title: id === 1 ? "Backend API integration" : "Research authentication methods",
-        description: id === 1 
-          ? "Connect frontend to backend APIs" 
-          : "Research and present different authentication approaches",
-        dueDate: new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-        priority: "high" as Priority,
-        completed: id === 1 ? true : false,
-        assignedTo: 2,
-        createdBy: id === 1 ? 1 : 2
-      },
-      {
-        id: 5,
-        title: id === 1 ? "User testing" : "Create mini-project",
-        description: id === 1 
-          ? "Conduct usability tests with potential users" 
-          : "Develop a small application using learned skills",
-        dueDate: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        priority: "medium" as Priority,
-        completed: false,
-        assignedTo: id === 1 ? 1 : 2,
-        createdBy: id === 1 ? 1 : 2
-      },
-      {
-        id: 6,
-        title: id === 1 ? "Bug fixing" : "Code review session",
-        description: id === 1 
-          ? "Address issues from user testing" 
-          : "Review code and provide feedback to group members",
-        dueDate: new Date(new Date().getTime() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
-        priority: "low" as Priority,
-        completed: false,
-        assignedTo: id === 1 ? 3 : 1,
-        createdBy: id === 1 ? 1 : 2
-      }
-    ].filter((_, i) => id === 1 || i < 5) // Group 2 has fewer tasks
-  };
+// Mock data for development
+const mockGroup = {
+  id: 1,
+  name: 'Study Group',
+  description: 'A group for studying together and tracking progress',
+  goalDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+  totalTasks: 6,
+  completedTasks: 2,
+  progress: 33,
 };
 
+const mockMembers = [
+  { id: 1, name: 'Sophia Lee', role: 'admin', completed: 2, total: 4, avatar: null },
+  { id: 2, name: 'Alex Johnson', role: 'member', completed: 1, total: 3, avatar: null },
+  { id: 3, name: 'Emma Wilson', role: 'member', completed: 0, total: 2, avatar: null },
+  { id: 4, name: 'Noah Garcia', role: 'member', completed: 2, total: 3, avatar: null },
+  { id: 5, name: 'Olivia Brown', role: 'member', completed: 1, total: 2, avatar: null },
+];
+
+const mockTasks: Array<{
+  id: number;
+  title: string;
+  description?: string;
+  dueDate: Date;
+  dueTime?: string;
+  priority: Priority;
+  completed: boolean;
+  assignedTo?: number;
+  createdBy: number;
+}> = [
+  {
+    id: 1,
+    title: 'Complete chapter 5 exercises',
+    description: 'Work through all practice problems at the end of the chapter',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 3)),
+    dueTime: '18:00',
+    priority: 'high',
+    completed: true,
+    assignedTo: 1,
+    createdBy: 1,
+  },
+  {
+    id: 2,
+    title: 'Research paper outline',
+    description: 'Create a detailed outline for the research paper',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 5)),
+    priority: 'medium',
+    completed: false,
+    assignedTo: 2,
+    createdBy: 1,
+  },
+  {
+    id: 3,
+    title: 'Review lecture notes',
+    dueDate: new Date(new Date().setDate(new Date().getDate() - 1)),
+    priority: 'low',
+    completed: false,
+    assignedTo: 3,
+    createdBy: 2,
+  },
+  {
+    id: 4,
+    title: 'Prepare presentation slides',
+    description: 'Create slides for the final presentation',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 10)),
+    priority: 'medium',
+    completed: true,
+    assignedTo: 4,
+    createdBy: 1,
+  },
+  {
+    id: 5,
+    title: 'Schedule group meeting',
+    description: 'Find a time that works for everyone to discuss progress',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 2)),
+    dueTime: '12:00',
+    priority: 'urgent',
+    completed: false,
+    assignedTo: 1,
+    createdBy: 1,
+  },
+  {
+    id: 6,
+    title: 'Share study resources',
+    description: 'Compile and share useful resources with the group',
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+    priority: 'low',
+    completed: false,
+    assignedTo: 5,
+    createdBy: 2,
+  },
+];
+
 export default function GroupView() {
-  const params = useParams<{ id: string }>();
-  const [, setLocation] = useLocation();
-  const [activeView, setActiveView] = useState<"overview" | "tasks">("overview");
+  const [match, params] = useRoute('/groups/:id');
+  const groupId = match ? parseInt(params.id) : null;
   
-  // In a real app, you would fetch this data from your API
-  const { group, members, tasks } = getGroupData(params.id);
+  // In a real implementation, we would fetch the group data using the ID
+  // const { isLoading, error, data } = useQuery({
+  //   queryKey: ['/api/groups', groupId],
+  //   enabled: !!groupId
+  // });
   
-  const handleCompleteTask = (taskId: number) => {
-    // In a real app, you would make an API call to update the task
-    console.log(`Marking task ${taskId} as complete`);
-  };
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   
-  const handleDeleteTask = (taskId: number) => {
-    // In a real app, you would make an API call to delete the task
-    console.log(`Deleting task ${taskId}`);
-  };
+  // For mock data, we're ignoring the actual groupId parameter
+  const group = mockGroup;
+  const members = mockMembers;
+  const tasks = mockTasks;
   
-  const handleReassignTask = (taskId: number, userId: number) => {
-    // In a real app, you would make an API call to reassign the task
-    console.log(`Reassigning task ${taskId} to user ${userId}`);
-  };
+  if (!groupId) return <div>Group not found</div>;
   
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="flex items-center gap-1" 
-          onClick={() => setLocation("/groups")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Groups
+    <div className="container mx-auto py-6">
+      <div className="mb-8">
+        <Button variant="outline" onClick={() => window.history.back()}>
+          ← Back to Groups
         </Button>
       </div>
       
-      <div className="flex flex-wrap gap-4 mb-6">
-        <Button
-          variant={activeView === "overview" ? "default" : "outline"}
-          onClick={() => setActiveView("overview")}
-          className={activeView === "overview" ? "bg-gradient-to-r from-blue-500 to-blue-600" : ""}
-        >
-          Group Overview
-        </Button>
-        <Button
-          variant={activeView === "tasks" ? "default" : "outline"} 
-          onClick={() => setActiveView("tasks")}
-          className={activeView === "tasks" ? "bg-gradient-to-r from-blue-500 to-blue-600" : ""}
-        >
-          Group Tasks
-        </Button>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="sr-only">Group Details</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsAddTaskModalOpen(true)}>
+            Add Task
+          </Button>
+          <Button variant="outline">
+            Invite Member
+          </Button>
+        </div>
       </div>
       
-      {activeView === "overview" ? (
-        <GroupDetails 
-          group={group} 
-          members={members}
-          tasks={tasks}
-        />
-      ) : (
-        <GroupTaskList 
-          tasks={tasks}
-          members={members}
-          onComplete={handleCompleteTask}
-          onDelete={handleDeleteTask}
-          onReassign={handleReassignTask}
-        />
-      )}
+      <GroupDetails 
+        group={group}
+        members={members}
+        tasks={tasks}
+      />
+      
+      {/* In a full implementation, we would add a CreateTaskModal component here */}
+      {/* <CreateTaskModal 
+        isOpen={isAddTaskModalOpen}
+        onClose={() => setIsAddTaskModalOpen(false)}
+        groupId={groupId}
+      /> */}
     </div>
   );
 }

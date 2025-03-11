@@ -20,9 +20,11 @@ interface GroupTask {
   title: string;
   description?: string;
   dueDate: Date;
+  dueTime?: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   completed: boolean;
-  assignedTo: number;
+  assignedTo?: number;
+  createdBy: number;
 }
 
 interface GroupDetailsProps {
