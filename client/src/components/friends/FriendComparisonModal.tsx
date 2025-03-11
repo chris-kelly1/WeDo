@@ -4,7 +4,7 @@ import { User, Task, Priority } from "@/lib/types";
 import { apiRequest } from "@/lib/queryClient";
 import { useUser } from "@/context/UserContext";
 import { cn } from "@/lib/utils";
-import { X, ChevronRight, Award, CheckCircle2, Clock, Target } from "lucide-react";
+import { X, ChevronRight, Award, CheckCircle2, Clock, Target, Check } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
@@ -250,7 +250,12 @@ export function FriendComparisonModal({ friend, isOpen, onClose }: FriendCompari
                         )}>
                           {task.title}
                         </span>
-                        {task.completed && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                        <div className={cn(
+                          "w-4 h-4 rounded-full flex items-center justify-center transition-colors",
+                          task.completed ? "bg-green-500" : "border-2 border-green-500 bg-white"
+                        )}>
+                          {task.completed && <Check className="w-3 h-3 text-white" />}
+                        </div>
                       </li>
                     ))}
                     {comparison.userTasks.length === 0 && (
@@ -274,7 +279,12 @@ export function FriendComparisonModal({ friend, isOpen, onClose }: FriendCompari
                         )}>
                           {task.title}
                         </span>
-                        {task.completed && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                        <div className={cn(
+                          "w-4 h-4 rounded-full flex items-center justify-center transition-colors",
+                          task.completed ? "bg-green-500" : "border-2 border-green-500 bg-white"
+                        )}>
+                          {task.completed && <Check className="w-3 h-3 text-white" />}
+                        </div>
                       </li>
                     ))}
                     {comparison.friendTasks.length === 0 && (

@@ -112,7 +112,7 @@ export function TaskCard({
               variant="outline"
               size="icon"
               className={cn(
-                "h-5 w-5 rounded-full p-0 border-2", 
+                "h-5 w-5 rounded-full p-0 border-2 transition-colors", 
                 task.completed 
                   ? "border-success bg-success" 
                   : "border-success bg-white"
@@ -123,8 +123,8 @@ export function TaskCard({
               }}
             >
               <Check className={cn(
-                "h-3 w-3", 
-                task.completed ? "text-white" : "text-success opacity-0"
+                "h-3 w-3 transition-opacity", 
+                task.completed ? "text-white opacity-100" : "text-success opacity-0"
               )} />
             </Button>
           </div>
