@@ -44,10 +44,14 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   const addTaskMutation = useMutation({
     mutationFn: async (task: Omit<Task, 'id' | 'userId' | 'completed' | 'createdAt'>) => {
       const taskWithUserId = { ...task, userId };
+      console.log("Adding task:", taskWithUserId);
       const response = await apiRequest('POST', '/api/tasks', taskWithUserId);
-      return response.json();
+      const data = await response.json();
+      console.log("Task created response:", data);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Success! Invalidating queries.");
       queryClient.invalidateQueries({ queryKey: [`/api/tasks?userId=${userId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/tasks/today?userId=${userId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/stats/today?userId=${userId}`] });
@@ -58,6 +62,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       setIsAddTaskModalOpen(false);
     },
     onError: (error) => {
+      console.error("Error adding task:", error);
       toast({
         title: "Error",
         description: `Failed to add task: ${error}`,
