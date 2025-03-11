@@ -171,6 +171,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: 'Error fetching friends' });
     }
   });
+  
+  // Get potential friends (users who are not already friends)
+  app.get('/api/friends/potential', async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: 'User ID is required' });
+      }
+      
+      const potentialFriends = await storage.getPotentialFriends(userId);
+      return res.json(potentialFriends);
+    } catch (error) {
+      console.error('Error fetching potential friends:', error);
+      return res.status(500).json({ message: 'Error fetching potential friends' });
+    }
+  });
+  
+  // Search users
+  app.get('/api/users/search', async (req, res) => {
+    try {
+      const query = req.query.q as string || "";
+      const results = await storage.searchUsers(query);
+      return res.json(results);
+    } catch (error) {
+      console.error('Error searching users:', error);
+      return res.status(500).json({ message: 'Error searching users' });
+    }
+  });
+  
+  // Add a friend
+  app.post('/api/friends', async (req, res) => {
+    try {
+      const { userId, friendId } = req.body;
+      
+      if (!userId || !friendId) {
+        return res.status(400).json({ message: 'Both userId and friendId are required' });
+      }
+      
+      const friend = await storage.addFriend({ userId, friendId });
+      
+      // Create a notification for the user
+      const addedFriend = await storage.getUser(friendId);
+      if (addedFriend) {
+        await storage.createNotification({
+          userId,
+          title: `You and ${addedFriend.name} are now friends!`,
+          type: 'friend_activity',
+          message: 'You can now compare your progress with each other.'
+        });
+      }
+      
+      return res.status(201).json(friend);
+    } catch (error) {
+      console.error('Error adding friend:', error);
+      return res.status(500).json({ message: 'Error adding friend' });
+    }
+  });
+  
+  // Remove a friend
+  app.delete('/api/friends/:friendId', async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      const friendId = parseInt(req.params.friendId);
+      
+      if (isNaN(userId) || isNaN(friendId)) {
+        return res.status(400).json({ message: 'Valid User ID and Friend ID are required' });
+      }
+      
+      const result = await storage.removeFriend(userId, friendId);
+      return res.json({ success: result });
+    } catch (error) {
+      console.error('Error removing friend:', error);
+      return res.status(500).json({ message: 'Error removing friend' });
+    }
+  });
 
   // Friend comparison endpoint
   app.get('/api/friends/:friendId/comparison', async (req, res) => {

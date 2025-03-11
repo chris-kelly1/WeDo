@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Friend } from '@/lib/types';
 import { useUser } from '@/context/UserContext';
 import { FriendCard } from '@/components/friends/FriendCard';
+import { FindFriendsModal } from '@/components/friends/FindFriendsModal';
 import { 
   Card, 
   CardContent, 
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Medal } from 'lucide-react';
+import { Search, Medal, UserPlus } from 'lucide-react';
 
 export default function Friends() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);

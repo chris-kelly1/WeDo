@@ -10,6 +10,8 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  searchUsers(query: string): Promise<User[]>;
   
   // Task operations
   getTasks(userId: number): Promise<Task[]>;
@@ -23,6 +25,7 @@ export interface IStorage {
   getFriends(userId: number): Promise<(User & { progress: number })[]>;
   addFriend(friend: InsertFriend): Promise<Friend>;
   removeFriend(userId: number, friendId: number): Promise<boolean>;
+  getPotentialFriends(userId: number): Promise<User[]>;
   getFriendComparison(userId: number, friendId: number): Promise<{
     user: User;
     friend: User;
@@ -176,6 +179,36 @@ export class MemStorage implements IStorage {
     return this.friends.delete(friendRelation.id);
   }
   
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+  
+  async searchUsers(query: string): Promise<User[]> {
+    if (!query) return [];
+    
+    query = query.toLowerCase();
+    return Array.from(this.users.values()).filter(user => 
+      user.name.toLowerCase().includes(query) || 
+      user.username.toLowerCase().includes(query) || 
+      user.email.toLowerCase().includes(query)
+    );
+  }
+  
+  async getPotentialFriends(userId: number): Promise<User[]> {
+    // Get all users except the current user
+    const allUsers = Array.from(this.users.values()).filter(user => user.id !== userId);
+    
+    // Get current friends
+    const friendRelations = Array.from(this.friends.values()).filter(
+      (relation) => relation.userId === userId
+    );
+    
+    const currentFriendIds = friendRelations.map(relation => relation.friendId);
+    
+    // Return users who are not already friends
+    return allUsers.filter(user => !currentFriendIds.includes(user.id));
+  }
+  
   async getFriendComparison(userId: number, friendId: number): Promise<{
     user: User;
     friend: User;
@@ -311,10 +344,66 @@ export class MemStorage implements IStorage {
       streak: 5
     };
     
+    // Additional users as potential friends
+    const user5: User = {
+      id: this.userIdCounter++,
+      username: "emma",
+      password: "password123",
+      email: "emma@example.com",
+      name: "Emma Wilson",
+      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      streak: 8
+    };
+    
+    const user6: User = {
+      id: this.userIdCounter++,
+      username: "james",
+      password: "password123",
+      email: "james@example.com",
+      name: "James Rodriguez",
+      avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      streak: 2
+    };
+    
+    const user7: User = {
+      id: this.userIdCounter++,
+      username: "sarah",
+      password: "password123",
+      email: "sarah@example.com",
+      name: "Sarah Kim",
+      avatar: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      streak: 6
+    };
+    
+    const user8: User = {
+      id: this.userIdCounter++,
+      username: "michael",
+      password: "password123",
+      email: "michael@example.com",
+      name: "Michael Brown",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      streak: 9
+    };
+    
+    const user9: User = {
+      id: this.userIdCounter++,
+      username: "olivia",
+      password: "password123",
+      email: "olivia@example.com",
+      name: "Olivia Martinez",
+      avatar: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      streak: 4
+    };
+    
     this.users.set(user1.id, user1);
     this.users.set(user2.id, user2);
     this.users.set(user3.id, user3);
     this.users.set(user4.id, user4);
+    this.users.set(user5.id, user5);
+    this.users.set(user6.id, user6);
+    this.users.set(user7.id, user7);
+    this.users.set(user8.id, user8);
+    this.users.set(user9.id, user9);
     
     // Create friend relationships
     this.friends.set(this.friendIdCounter++, { id: this.friendIdCounter, userId: user1.id, friendId: user2.id });
