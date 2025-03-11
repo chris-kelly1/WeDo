@@ -114,6 +114,7 @@ export class MemStorage implements IStorage {
       ...insertTask, 
       id, 
       completed: false,
+      private: insertTask.private || false,
       createdAt: new Date()
     };
     this.tasks.set(id, task);
@@ -191,8 +192,12 @@ export class MemStorage implements IStorage {
       throw new Error("User or friend not found");
     }
     
+    // Get all user tasks (private and public)
     const userTasks = await this.getTasks(userId);
-    const friendTasks = await this.getTasks(friendId);
+    
+    // Get only friend's public tasks (exclude private ones)
+    const allFriendTasks = await this.getTasks(friendId);
+    const friendTasks = allFriendTasks.filter(task => !task.private);
     
     // Calculate user stats
     const userCompletedTasks = userTasks.filter(task => task.completed);

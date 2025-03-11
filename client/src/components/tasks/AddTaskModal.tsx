@@ -37,6 +37,7 @@ const taskSchema = z.object({
   dueDate: z.string().min(1, 'Due date is required'),
   dueTime: z.string().optional(),
   priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+  private: z.boolean().default(false),
 });
 
 type TaskFormValues = z.infer<typeof taskSchema>;
@@ -57,6 +58,7 @@ export function AddTaskModal({ isOpen, onClose, onSubmit, isSubmitting }: AddTas
       dueDate: formatDateForInput(new Date()),
       dueTime: '',
       priority: 'medium',
+      private: false,
     },
   });
 
@@ -67,6 +69,7 @@ export function AddTaskModal({ isOpen, onClose, onSubmit, isSubmitting }: AddTas
       dueDate: new Date(values.dueDate),
       dueTime: values.dueTime || undefined,
       priority: values.priority as Priority,
+      private: values.private,
     });
 
     form.reset();

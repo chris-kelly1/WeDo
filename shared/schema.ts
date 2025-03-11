@@ -23,6 +23,7 @@ export const tasks = pgTable("tasks", {
   dueTime: text("due_time"),
   priority: priorityEnum("priority").default("medium"),
   completed: boolean("completed").default(false),
+  private: boolean("private").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -57,6 +58,7 @@ export const insertTaskSchema = createInsertSchema(tasks).pick({
   dueDate: true,
   dueTime: true,
   priority: true,
+  private: true,
 });
 
 export const insertFriendSchema = createInsertSchema(friends).pick({
