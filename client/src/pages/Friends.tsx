@@ -6,7 +6,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Friend } from '@/lib/types';
 import { useUser } from '@/context/UserContext';
 import { FriendCard } from '@/components/friends/FriendCard';
-import { FindFriendsModal } from '@/components/friends/FindFriendsModal';
 import { 
   Card, 
   CardContent, 
@@ -16,30 +15,21 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Medal, UserPlus } from 'lucide-react';
+import { Search, Medal } from 'lucide-react';
 
 export default function Friends() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isFindFriendsOpen, setIsFindFriendsOpen] = useState(false);
   const { currentUser } = useUser();
   const userId = currentUser?.id || 1;
 
   const { data: friends = [], isLoading } = useQuery<Friend[]>({
-    queryKey: ['/api/friends', userId],
+    queryKey: [`/api/friends?userId=${userId}`],
     enabled: !!userId,
   });
   
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
-  };
-  
-  const openFindFriendsModal = () => {
-    setIsFindFriendsOpen(true);
-  };
-  
-  const closeFindFriendsModal = () => {
-    setIsFindFriendsOpen(false);
   };
   
   // Get top performers
@@ -90,14 +80,7 @@ export default function Friends() {
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               </div>
-              <Button 
-                className="ml-2" 
-                onClick={openFindFriendsModal} 
-                variant="secondary"
-              >
-                <UserPlus className="h-4 w-4 mr-1" />
-                Find Friends
-              </Button>
+              <Button className="ml-2">Find Friends</Button>
             </div>
           </div>
           
@@ -145,10 +128,7 @@ export default function Friends() {
                 <Card>
                   <CardContent className="pt-6 text-center">
                     <p className="text-gray-500 mb-4">You haven't added any friends yet</p>
-                    <Button onClick={openFindFriendsModal}>
-                      <UserPlus className="h-4 w-4 mr-1" />
-                      Find Friends
-                    </Button>
+                    <Button>Find Friends</Button>
                   </CardContent>
                 </Card>
               )
@@ -164,12 +144,6 @@ export default function Friends() {
         
         <MobileNavigation />
       </div>
-      
-      {/* Find Friends Modal */}
-      <FindFriendsModal 
-        isOpen={isFindFriendsOpen} 
-        onClose={closeFindFriendsModal} 
-      />
     </div>
   );
 }
