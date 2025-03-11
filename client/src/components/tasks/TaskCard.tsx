@@ -112,10 +112,10 @@ export function TaskCard({
               variant="outline"
               size="icon"
               className={cn(
-                "h-5 w-5 rounded-full p-0 border-2 transition-colors", 
+                "h-5 w-5 rounded-full p-0 border-2 flex items-center justify-center transition-all", 
                 task.completed 
-                  ? "border-success bg-success" 
-                  : "border-success bg-white"
+                  ? "border-green-500 bg-green-500" 
+                  : "border-green-500 bg-white"
               )}
               onClick={(e) => {
                 e.stopPropagation(); // Prevent row expansion on click
@@ -124,7 +124,7 @@ export function TaskCard({
             >
               <Check className={cn(
                 "h-3 w-3 transition-opacity", 
-                task.completed ? "text-white opacity-100" : "text-success opacity-0"
+                task.completed ? "text-white opacity-100" : "text-green-500 opacity-0"
               )} />
             </Button>
           </div>

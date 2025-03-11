@@ -251,10 +251,10 @@ export function FriendComparisonModal({ friend, isOpen, onClose }: FriendCompari
                           {task.title}
                         </span>
                         <div className={cn(
-                          "w-4 h-4 rounded-full flex items-center justify-center transition-colors",
-                          task.completed ? "bg-green-500" : "border-2 border-green-500 bg-white"
+                          "w-4 h-4 rounded-full flex items-center justify-center border-2 transition-all",
+                          task.completed ? "bg-green-500 border-green-500" : "border-green-500 bg-white"
                         )}>
-                          {task.completed && <Check className="w-3 h-3 text-white" />}
+                          {task.completed && <Check className="w-2 h-2 text-white" />}
                         </div>
                       </li>
                     ))}
@@ -280,10 +280,10 @@ export function FriendComparisonModal({ friend, isOpen, onClose }: FriendCompari
                           {task.title}
                         </span>
                         <div className={cn(
-                          "w-4 h-4 rounded-full flex items-center justify-center transition-colors",
-                          task.completed ? "bg-green-500" : "border-2 border-green-500 bg-white"
+                          "w-4 h-4 rounded-full flex items-center justify-center border-2 transition-all",
+                          task.completed ? "bg-green-500 border-green-500" : "border-green-500 bg-white"
                         )}>
-                          {task.completed && <Check className="w-3 h-3 text-white" />}
+                          {task.completed && <Check className="w-2 h-2 text-white" />}
                         </div>
                       </li>
                     ))}
