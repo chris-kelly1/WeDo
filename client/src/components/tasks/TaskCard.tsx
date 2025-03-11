@@ -46,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface TaskCardProps {
   task: Task;
@@ -253,6 +254,24 @@ export function TaskCard({
                 value={editedTask.dueTime} 
                 onChange={(e) => setEditedTask({...editedTask, dueTime: e.target.value})}
               />
+            </div>
+            
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox 
+                id="private" 
+                checked={editedTask.private}
+                onCheckedChange={(checked) => 
+                  setEditedTask({...editedTask, private: checked === true})
+                }
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label htmlFor="private" className="text-sm font-medium">
+                  Private Task
+                </Label>
+                <p className="text-sm text-gray-500">
+                  Mark as private to hide this task from friends
+                </p>
+              </div>
             </div>
           </div>
           <DialogFooter>
