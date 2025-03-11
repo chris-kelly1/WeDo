@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Friend } from '@/lib/types';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FriendComparisonModal } from './FriendComparisonModal';
+import { NudgeModal } from './NudgeModal';
 
 interface FriendCardProps {
   friend: Friend;
@@ -12,8 +13,13 @@ interface FriendCardProps {
 
 export function FriendCard({ friend }: FriendCardProps) {
   const [isComparisonModalOpen, setIsComparisonModalOpen] = useState(false);
+  const [isNudgeModalOpen, setIsNudgeModalOpen] = useState(false);
   
   const openComparisonModal = () => setIsComparisonModalOpen(true);
+  const openNudgeModal = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the parent onClick
+    setIsNudgeModalOpen(true);
+  };
   
   return (
     <>
@@ -41,7 +47,17 @@ export function FriendCard({ friend }: FriendCardProps) {
           <Progress value={friend.progress} className="h-full" />
         </div>
         
-        <div className="flex justify-end mt-3">
+        <div className="flex justify-between mt-3">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-blue-600 hover:text-blue-800 flex items-center"
+            onClick={openNudgeModal}
+          >
+            <Bell className="h-4 w-4 mr-1" />
+            <span className="text-sm">Nudge</span>
+          </Button>
+          
           <Button 
             variant="ghost" 
             size="sm" 
@@ -57,6 +73,12 @@ export function FriendCard({ friend }: FriendCardProps) {
         friend={friend}
         isOpen={isComparisonModalOpen}
         onClose={() => setIsComparisonModalOpen(false)}
+      />
+      
+      <NudgeModal
+        friend={friend}
+        isOpen={isNudgeModalOpen}
+        onClose={() => setIsNudgeModalOpen(false)}
       />
     </>
   );
