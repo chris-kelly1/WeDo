@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { Home, CheckSquare, BarChart2, Users, Plus } from 'lucide-react';
+import { Home, CheckSquare, BarChart2, Users, Plus, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useTasks } from '@/context/TaskContext';
@@ -14,11 +14,12 @@ export function MobileNavigation() {
     { icon: null, label: 'Add', path: '', action: openAddTaskModal },
     { icon: BarChart2, label: 'Progress', path: '/progress' },
     { icon: Users, label: 'Friends', path: '/friends' },
+    { icon: UserPlus, label: 'Groups', path: '/groups' },
   ];
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 z-10">
-      <div className="grid grid-cols-5 gap-1">
+      <div className="grid grid-cols-6 gap-1">
         {navItems.map((item, index) => {
           const isActive = item.path && location === item.path;
           const Icon = item.icon;

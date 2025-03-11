@@ -2,7 +2,7 @@ import { Link, useLocation } from 'wouter';
 import { useUser } from '@/context/UserContext';
 import { UserProfile } from '@/components/ui/UserProfile';
 import { cn } from '@/lib/utils';
-import { Home, CheckSquare, BarChart2, Users, Settings } from 'lucide-react';
+import { Home, CheckSquare, BarChart2, Users, Settings, UserPlus } from 'lucide-react';
 
 interface SidebarProps {
   className?: string;
@@ -17,6 +17,7 @@ export function Sidebar({ className }: SidebarProps) {
     { icon: CheckSquare, label: 'My Tasks', path: '/tasks' },
     { icon: BarChart2, label: 'Progress', path: '/progress' },
     { icon: Users, label: 'Friends', path: '/friends' },
+    { icon: UserPlus, label: 'Groups', path: '/groups' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
