@@ -1,7 +1,8 @@
 import { 
-  users, tasks, friends, notifications,
-  type User, type Task, type Friend, type Notification,
-  type InsertUser, type InsertTask, type InsertFriend, type InsertNotification
+  users, tasks, friends, notifications, groups, groupMembers,
+  type User, type Task, type Friend, type Notification, type Group, type GroupMember,
+  type InsertUser, type InsertTask, type InsertFriend, type InsertNotification, 
+  type InsertGroup, type InsertGroupMember
 } from "@shared/schema";
 import { format } from "date-fns";
 
@@ -37,6 +38,21 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(id: number): Promise<Notification | undefined>;
   deleteNotification(id: number): Promise<boolean>;
+  
+  // Group operations
+  getGroups(userId: number): Promise<Group[]>;
+  getGroup(id: number): Promise<Group | undefined>;
+  getGroupMembers(groupId: number): Promise<(User & { role: string })[]>;
+  getGroupTasks(groupId: number): Promise<Task[]>;
+  createGroup(group: InsertGroup): Promise<Group>;
+  addGroupMember(member: InsertGroupMember): Promise<GroupMember>;
+  removeGroupMember(groupId: number, userId: number): Promise<boolean>;
+  getGroupProgress(groupId: number): Promise<{
+    group: Group;
+    totalTasks: number;
+    completedTasks: number;
+    memberProgress: { userId: number; username: string; name: string; completed: number; total: number }[];
+  }>;
 }
 
 function formatDate(date: Date): string {
@@ -52,22 +68,30 @@ export class MemStorage implements IStorage {
   private tasks: Map<number, Task>;
   private friends: Map<number, Friend>;
   private notifications: Map<number, Notification>;
+  private groups: Map<number, Group>;
+  private groupMembers: Map<number, GroupMember>;
   
   private userIdCounter: number;
   private taskIdCounter: number;
   private friendIdCounter: number;
   private notificationIdCounter: number;
+  private groupIdCounter: number;
+  private groupMemberIdCounter: number;
 
   constructor() {
     this.users = new Map();
     this.tasks = new Map();
     this.friends = new Map();
     this.notifications = new Map();
+    this.groups = new Map();
+    this.groupMembers = new Map();
     
     this.userIdCounter = 1;
     this.taskIdCounter = 1;
     this.friendIdCounter = 1;
     this.notificationIdCounter = 1;
+    this.groupIdCounter = 1;
+    this.groupMemberIdCounter = 1;
     
     // Seed with sample data
     this.seedData();
@@ -273,6 +297,130 @@ export class MemStorage implements IStorage {
     return this.notifications.delete(id);
   }
   
+  // Group operations
+  async getGroups(userId: number): Promise<Group[]> {
+    // Get all groups where the user is a member
+    const memberGroups = Array.from(this.groupMembers.values())
+      .filter(member => member.userId === userId)
+      .map(member => member.groupId);
+    
+    // Get all groups the user created
+    const createdGroups = Array.from(this.groups.values())
+      .filter(group => group.createdBy === userId)
+      .map(group => group.id);
+    
+    // Combine both lists and remove duplicates
+    const uniqueGroupIds = [...new Set([...memberGroups, ...createdGroups])];
+    
+    // Return the group objects
+    return uniqueGroupIds.map(groupId => this.groups.get(groupId)!).filter(Boolean);
+  }
+  
+  async getGroup(id: number): Promise<Group | undefined> {
+    return this.groups.get(id);
+  }
+  
+  async getGroupMembers(groupId: number): Promise<(User & { role: string })[]> {
+    const members = Array.from(this.groupMembers.values())
+      .filter(member => member.groupId === groupId);
+    
+    return Promise.all(
+      members.map(async member => {
+        const user = await this.getUser(member.userId);
+        if (!user) throw new Error("User not found");
+        
+        return {
+          ...user,
+          role: member.role
+        };
+      })
+    );
+  }
+  
+  async getGroupTasks(groupId: number): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.groupId === groupId
+    );
+  }
+  
+  async createGroup(group: InsertGroup): Promise<Group> {
+    const id = this.groupIdCounter++;
+    const newGroup: Group = {
+      ...group,
+      id,
+      createdAt: new Date()
+    };
+    this.groups.set(id, newGroup);
+    
+    // Automatically add the creator as an admin
+    await this.addGroupMember({
+      groupId: id,
+      userId: group.createdBy,
+      role: "admin"
+    });
+    
+    return newGroup;
+  }
+  
+  async addGroupMember(member: InsertGroupMember): Promise<GroupMember> {
+    const id = this.groupMemberIdCounter++;
+    const newMember: GroupMember = {
+      ...member,
+      id,
+      joinedAt: new Date()
+    };
+    this.groupMembers.set(id, newMember);
+    return newMember;
+  }
+  
+  async removeGroupMember(groupId: number, userId: number): Promise<boolean> {
+    const member = Array.from(this.groupMembers.values()).find(
+      m => m.groupId === groupId && m.userId === userId
+    );
+    
+    if (!member) return false;
+    return this.groupMembers.delete(member.id);
+  }
+  
+  async getGroupProgress(groupId: number): Promise<{
+    group: Group;
+    totalTasks: number;
+    completedTasks: number;
+    memberProgress: { userId: number; username: string; name: string; completed: number; total: number }[];
+  }> {
+    const group = await this.getGroup(groupId);
+    if (!group) throw new Error("Group not found");
+    
+    const groupTasks = await this.getGroupTasks(groupId);
+    const totalTasks = groupTasks.length;
+    const completedTasks = groupTasks.filter(task => task.completed).length;
+    
+    const members = await this.getGroupMembers(groupId);
+    
+    const memberProgress = await Promise.all(
+      members.map(async member => {
+        // Get tasks assigned to this member in this group
+        const memberTasks = groupTasks.filter(task => task.userId === member.id);
+        const memberCompletedTasks = memberTasks.filter(task => task.completed);
+        
+        return {
+          userId: member.id,
+          username: member.username,
+          name: member.name,
+          completed: memberCompletedTasks.length,
+          total: memberTasks.length
+        };
+      })
+    );
+    
+    return {
+      group,
+      totalTasks,
+      completedTasks,
+      memberProgress
+    };
+  }
+  
   // Seed data for development
   private seedData() {
     // Create users
@@ -472,6 +620,168 @@ export class MemStorage implements IStorage {
       type: "reminder",
       read: false,
       createdAt: new Date(today.getTime() - 4 * 60 * 60 * 1000)
+    });
+    
+    // Create groups
+    const projectGroup = {
+      id: this.groupIdCounter++,
+      name: "Website Redesign",
+      description: "Collaborative project to redesign company website",
+      goalDate: new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
+      createdBy: user1.id,
+      createdAt: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+      avatar: null
+    };
+    
+    const studyGroup = {
+      id: this.groupIdCounter++,
+      name: "Coding Study Group",
+      description: "Group for learning and practicing coding together",
+      goalDate: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      createdBy: user2.id,
+      createdAt: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+      avatar: null
+    };
+    
+    this.groups.set(projectGroup.id, projectGroup);
+    this.groups.set(studyGroup.id, studyGroup);
+    
+    // Add members to groups
+    // Website Redesign group - Sophia is already the admin as creator
+    this.groupMembers.set(this.groupMemberIdCounter++, {
+      id: this.groupMemberIdCounter,
+      groupId: projectGroup.id,
+      userId: user1.id,
+      role: "admin",
+      joinedAt: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.groupMembers.set(this.groupMemberIdCounter++, {
+      id: this.groupMemberIdCounter,
+      groupId: projectGroup.id,
+      userId: user2.id,
+      role: "member",
+      joinedAt: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.groupMembers.set(this.groupMemberIdCounter++, {
+      id: this.groupMemberIdCounter,
+      groupId: projectGroup.id,
+      userId: user3.id,
+      role: "member",
+      joinedAt: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000)
+    });
+    
+    // Coding Study Group
+    this.groupMembers.set(this.groupMemberIdCounter++, {
+      id: this.groupMemberIdCounter,
+      groupId: studyGroup.id,
+      userId: user2.id,
+      role: "admin",
+      joinedAt: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.groupMembers.set(this.groupMemberIdCounter++, {
+      id: this.groupMemberIdCounter,
+      groupId: studyGroup.id,
+      userId: user1.id,
+      role: "member",
+      joinedAt: new Date(today.getTime() - 8 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.groupMembers.set(this.groupMemberIdCounter++, {
+      id: this.groupMemberIdCounter,
+      groupId: studyGroup.id,
+      userId: user4.id,
+      role: "member",
+      joinedAt: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+    });
+    
+    // Create group tasks
+    // Tasks for Website Redesign group
+    this.tasks.set(this.taskIdCounter++, {
+      id: this.taskIdCounter,
+      userId: user1.id,
+      title: "Define website requirements",
+      description: "Create a document with all website requirements and objectives",
+      dueDate: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000),
+      dueTime: "14:00",
+      priority: "high",
+      completed: true,
+      private: false,
+      groupId: projectGroup.id,
+      createdAt: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.tasks.set(this.taskIdCounter++, {
+      id: this.taskIdCounter,
+      userId: user2.id,
+      title: "Design homepage mockup",
+      description: "Create a mockup for the new homepage design",
+      dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000),
+      dueTime: "17:00",
+      priority: "medium",
+      completed: false,
+      private: false,
+      groupId: projectGroup.id,
+      createdAt: new Date(today.getTime() - 4 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.tasks.set(this.taskIdCounter++, {
+      id: this.taskIdCounter,
+      userId: user3.id,
+      title: "Database schema design",
+      description: "Design the database schema for the new website",
+      dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000),
+      dueTime: "16:00",
+      priority: "high",
+      completed: false,
+      private: false,
+      groupId: projectGroup.id,
+      createdAt: new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000)
+    });
+    
+    // Tasks for Coding Study Group
+    this.tasks.set(this.taskIdCounter++, {
+      id: this.taskIdCounter,
+      userId: user2.id,
+      title: "Prepare JavaScript exercises",
+      description: "Create a set of JavaScript exercises for the next study session",
+      dueDate: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000),
+      dueTime: "10:00",
+      priority: "medium",
+      completed: true,
+      private: false,
+      groupId: studyGroup.id,
+      createdAt: new Date(today.getTime() - 9 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.tasks.set(this.taskIdCounter++, {
+      id: this.taskIdCounter,
+      userId: user1.id,
+      title: "Research React hooks",
+      description: "Research and prepare a presentation on React hooks",
+      dueDate: new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000),
+      dueTime: "12:00",
+      priority: "low",
+      completed: false,
+      private: false,
+      groupId: studyGroup.id,
+      createdAt: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+    });
+    
+    this.tasks.set(this.taskIdCounter++, {
+      id: this.taskIdCounter,
+      userId: user4.id,
+      title: "Organize coding challenge",
+      description: "Organize a coding challenge for the group",
+      dueDate: new Date(today.getTime() + 15 * 24 * 60 * 60 * 1000),
+      dueTime: "18:00",
+      priority: "urgent",
+      completed: false,
+      private: false,
+      groupId: studyGroup.id,
+      createdAt: new Date(today.getTime() - 5 * 24 * 60 * 60 * 1000)
     });
   }
 }
