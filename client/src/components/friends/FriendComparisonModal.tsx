@@ -36,8 +36,17 @@ export function FriendComparisonModal({ friend, isOpen, onClose }: FriendCompari
     queryKey: ['/api/friends', friend.id, 'comparison'],
     enabled: isOpen && !!currentUser?.id && !!friend?.id,
     queryFn: async () => {
-      const response = await apiRequest(`/api/friends/${friend.id}/comparison?userId=${currentUser?.id}`);
-      return response as ComparisonData;
+      try {
+        const response = await fetch(`/api/friends/${friend.id}/comparison?userId=${currentUser?.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch comparison data');
+        }
+        const data = await response.json();
+        return data as ComparisonData;
+      } catch (error) {
+        console.error('Error fetching comparison data:', error);
+        throw error;
+      }
     },
   });
   
