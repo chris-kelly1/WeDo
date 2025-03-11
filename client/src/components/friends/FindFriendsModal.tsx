@@ -57,10 +57,9 @@ export function FindFriendsModal({ isOpen, onClose }: FindFriendsModalProps) {
   // Add friend mutation
   const addFriendMutation = useMutation({
     mutationFn: async (friendId: number) => {
-      const result = await apiRequest('/api/friends', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUser?.id, friendId }),
+      const result = await apiRequest('/api/friends', 'POST', { 
+        userId: currentUser?.id, 
+        friendId 
       });
       return result;
     },
