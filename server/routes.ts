@@ -172,6 +172,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Friend comparison endpoint
+  app.get('/api/friends/:friendId/comparison', async (req, res) => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+      const friendId = parseInt(req.params.friendId);
+      
+      if (isNaN(userId) || isNaN(friendId)) {
+        return res.status(400).json({ message: 'Valid User ID and Friend ID are required' });
+      }
+      
+      const comparison = await storage.getFriendComparison(userId, friendId);
+      return res.json(comparison);
+    } catch (error) {
+      console.error('Error fetching friend comparison:', error);
+      return res.status(500).json({ message: 'Error fetching friend comparison data' });
+    }
+  });
+
   // Notification routes
   app.get('/api/notifications', async (req, res) => {
     try {

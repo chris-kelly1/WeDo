@@ -23,6 +23,14 @@ export interface IStorage {
   getFriends(userId: number): Promise<(User & { progress: number })[]>;
   addFriend(friend: InsertFriend): Promise<Friend>;
   removeFriend(userId: number, friendId: number): Promise<boolean>;
+  getFriendComparison(userId: number, friendId: number): Promise<{
+    user: User;
+    friend: User;
+    userTasks: Task[];
+    friendTasks: Task[];
+    userStats: { completed: number; total: number; byPriority: Record<string, number> };
+    friendStats: { completed: number; total: number; byPriority: Record<string, number> };
+  }>;
   
   // Notification operations
   getNotifications(userId: number): Promise<Notification[]>;
@@ -166,6 +174,66 @@ export class MemStorage implements IStorage {
     
     if (!friendRelation) return false;
     return this.friends.delete(friendRelation.id);
+  }
+  
+  async getFriendComparison(userId: number, friendId: number): Promise<{
+    user: User;
+    friend: User;
+    userTasks: Task[];
+    friendTasks: Task[];
+    userStats: { completed: number; total: number; byPriority: Record<string, number> };
+    friendStats: { completed: number; total: number; byPriority: Record<string, number> };
+  }> {
+    const user = await this.getUser(userId);
+    const friend = await this.getUser(friendId);
+    
+    if (!user || !friend) {
+      throw new Error("User or friend not found");
+    }
+    
+    const userTasks = await this.getTasks(userId);
+    const friendTasks = await this.getTasks(friendId);
+    
+    // Calculate user stats
+    const userCompletedTasks = userTasks.filter(task => task.completed);
+    const userTotalTasks = userTasks.length;
+    
+    // Calculate tasks by priority for user
+    const userTasksByPriority: Record<string, number> = {
+      low: userTasks.filter(task => task.priority === 'low' && task.completed).length,
+      medium: userTasks.filter(task => task.priority === 'medium' && task.completed).length,
+      high: userTasks.filter(task => task.priority === 'high' && task.completed).length,
+      urgent: userTasks.filter(task => task.priority === 'urgent' && task.completed).length
+    };
+    
+    // Calculate friend stats
+    const friendCompletedTasks = friendTasks.filter(task => task.completed);
+    const friendTotalTasks = friendTasks.length;
+    
+    // Calculate tasks by priority for friend
+    const friendTasksByPriority: Record<string, number> = {
+      low: friendTasks.filter(task => task.priority === 'low' && task.completed).length,
+      medium: friendTasks.filter(task => task.priority === 'medium' && task.completed).length,
+      high: friendTasks.filter(task => task.priority === 'high' && task.completed).length,
+      urgent: friendTasks.filter(task => task.priority === 'urgent' && task.completed).length
+    };
+    
+    return {
+      user,
+      friend,
+      userTasks,
+      friendTasks,
+      userStats: {
+        completed: userCompletedTasks.length,
+        total: userTotalTasks,
+        byPriority: userTasksByPriority
+      },
+      friendStats: {
+        completed: friendCompletedTasks.length,
+        total: friendTotalTasks,
+        byPriority: friendTasksByPriority
+      }
+    };
   }
   
   // Notification operations
