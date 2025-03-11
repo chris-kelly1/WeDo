@@ -18,6 +18,7 @@ export interface Task {
   dueTime?: string;
   priority: Priority;
   completed: boolean;
+  private?: boolean;
   createdAt: string | Date;
 }
 

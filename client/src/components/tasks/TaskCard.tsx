@@ -6,7 +6,8 @@ import {
   Check,
   Edit2,
   Trash2,
-  PenLine
+  PenLine,
+  EyeOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
@@ -69,7 +70,8 @@ export function TaskCard({
     title: task.title,
     description: task.description || '',
     priority: task.priority,
-    dueTime: task.dueTime || ''
+    dueTime: task.dueTime || '',
+    private: task.private || false
   });
   
   const getPriorityBadgeStyles = (priority: Priority) => {
@@ -140,6 +142,11 @@ export function TaskCard({
                 {task.title}
               </h3>
               <div className="flex items-center space-x-2">
+                {task.private && (
+                  <div className="flex items-center text-gray-500 mr-1" title="Private task">
+                    <EyeOff className="h-3.5 w-3.5" />
+                  </div>
+                )}
                 <span 
                   className={cn(
                     "px-2 py-1 text-xs font-medium rounded-full",
