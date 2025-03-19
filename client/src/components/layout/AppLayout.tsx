@@ -12,6 +12,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const { openAddTaskModal } = useTasks();
   
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
@@ -45,6 +46,18 @@ export function AppLayout({ children }: AppLayoutProps) {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
           {children}
         </main>
+        
+        {/* Floating action button for adding tasks */}
+        <div className="fixed right-6 bottom-24 lg:bottom-8 z-50">
+          <Button 
+            onClick={openAddTaskModal}
+            className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white shadow-xl hover:shadow-2xl transition-all duration-200"
+            size="icon"
+          >
+            <Plus className="h-8 w-8" />
+            <span className="absolute inset-0 rounded-full animate-ping bg-blue-400 opacity-25"></span>
+          </Button>
+        </div>
         
         <MobileNavigation />
       </div>
