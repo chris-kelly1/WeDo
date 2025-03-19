@@ -40,13 +40,34 @@ export default function MyTasks() {
         : [...prev, taskId]
     );
   };
+
+  // Helper function to sort tasks by completion status (incomplete first, then completed)
+  const sortTasksByCompletion = (tasks: Task[]): Task[] => {
+    return [...tasks].sort((a, b) => {
+      // Sort by completion status first (incomplete tasks come first)
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+      // If completion status is the same, sort by due date (oldest first)
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    });
+  };
   
-  // Filter tasks by tab
-  const todayTasks = tasks.filter(task => isToday(new Date(task.dueDate)));
-  const upcomingTasks = tasks.filter(task => isFuture(new Date(task.dueDate)));
-  const pastTasks = tasks.filter(task => 
-    isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate))
+  // Filter tasks by tab and sort by completion status
+  const todayTasks = sortTasksByCompletion(
+    tasks.filter(task => isToday(new Date(task.dueDate)))
   );
+  
+  const upcomingTasks = sortTasksByCompletion(
+    tasks.filter(task => isFuture(new Date(task.dueDate)))
+  );
+  
+  const pastTasks = sortTasksByCompletion(
+    tasks.filter(task => 
+      isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate))
+    )
+  );
+  
   const completedTasks = tasks.filter(task => task.completed);
   
   // Get incomplete past tasks
@@ -97,8 +118,12 @@ export default function MyTasks() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">My Tasks</h1>
-            <Button onClick={openAddTaskModal}>
-              <Plus className="mr-1 h-4 w-4" /> Add Task
+            <Button 
+              onClick={openAddTaskModal}
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 animate-pulse"
+            >
+              <Plus className="mr-2 h-5 w-5" /> Add New Task
             </Button>
           </div>
           
@@ -137,8 +162,12 @@ export default function MyTasks() {
               ) : todayTasks.length === 0 ? (
                 <div className="text-center p-8 bg-white rounded-lg shadow">
                   <p className="text-gray-500 mb-4">No tasks for today</p>
-                  <Button onClick={openAddTaskModal}>
-                    <Plus className="mr-1 h-4 w-4" /> Add a task
+                  <Button 
+                    onClick={openAddTaskModal}
+                    className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    size="lg"
+                  >
+                    <Plus className="mr-2 h-5 w-5" /> Add New Task
                   </Button>
                 </div>
               ) : (

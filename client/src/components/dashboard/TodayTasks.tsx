@@ -36,8 +36,15 @@ export function TodayTasks() {
     setIsSectionExpanded(!isSectionExpanded);
   };
   
-  // Show all tasks always
-  const displayTasks = todayTasks;
+  // Sort tasks by completion status (incomplete first)
+  const displayTasks = [...todayTasks].sort((a, b) => {
+    // Sort by completion status first (incomplete tasks first)
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1;
+    }
+    // If completion status is the same, sort by due date
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+  });
   
   if (isLoading) {
     return (
@@ -91,8 +98,10 @@ export function TodayTasks() {
                   e.stopPropagation();
                   openAddTaskModal();
                 }}
+                className="relative text-blue-600 hover:text-blue-800"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-5 w-5" />
+                <span className="absolute inset-0 animate-ping opacity-50 rounded-full bg-blue-200 h-full w-full"></span>
               </Button>
               {isSectionExpanded ? (
                 <ChevronUp className="h-5 w-5 text-gray-500" />
@@ -107,8 +116,12 @@ export function TodayTasks() {
               {displayTasks.length === 0 ? (
                 <div className="bg-gray-50 rounded-lg p-6 text-center">
                   <p className="text-gray-500 mb-4">No tasks for today. Add your first task!</p>
-                  <Button onClick={openAddTaskModal}>
-                    <Plus className="mr-1 h-4 w-4" /> Add Task
+                  <Button 
+                    onClick={openAddTaskModal}
+                    className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                    size="lg"
+                  >
+                    <Plus className="mr-2 h-5 w-5" /> Add New Task
                   </Button>
                 </div>
               ) : (

@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { MobileNavigation } from '@/components/layout/MobileNavigation';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useTasks } from '@/context/TaskContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;

@@ -90,7 +90,6 @@ export default function Progress() {
   if (isLoading) {
     return (
       <div className="flex h-screen">
-        <Sidebar />
         <div className="lg:pl-64 flex flex-col flex-1 h-full">
           <TopBar onMenuClick={toggleMobileSidebar} />
           <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 lg:pb-6">
